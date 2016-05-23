@@ -1,67 +1,32 @@
-cd /usr/local/hadoop/data/namenode/
-rm -rf *
-cd /usr/local/hadoop/data/datanode/
-rm -rf *
-cd ../../logs/
-rm -rf *
-cd /usr/local/zookeeper
-rm -rf *
-cd /usr/local/hbase/logs/
-rm -rf *
-cd ..
-rm hs_err_pid*
-rm replay_pid*
-cd
-rm hs_err_pid*
-rm replay_pid*
+#!/bin/bash
+# This Script to remove all thing in dest's directory
+echo "Are you to CLEAN ALL DATA in HDFS ? (Y/N)"
+read ans
+if [ $ans != 'Y' ]; then
+	exit
+fi
 
-
-ssh rserver1 '
-cd /usr/local/hadoop/data/datanode/
-rm -rf *
-cd ../../logs/
-rm -rf *
-cd /usr/local/hbase/logs/
-rm -rf *
-cd ..
-rm hs_err_pid*
-rm replay_pid*
-cd
-rm hs_err_pid*
-rm replay_pid*
-
-
-exit
-'
-ssh rserver2 '
-cd /usr/local/hadoop/data/datanode/
-rm -rf *
-cd /usr/local/hbase/logs/
-rm -rf *
-cd ..
-rm hs_err_pid*
-rm replay_pid*
-cd
-rm hs_err_pid*
-rm replay_pid*
-
-
-exit
-'
-
-ssh master2 '
-cd /usr/local/zookeeper
-rm -rf *
-cd /usr/local/hbase/logs/
-rm -rf *
-cd ..
-rm hs_err_pid*
-rm replay_pid*
-cd
-rm hs_err_pid*
-rm replay_pid*
-
-
-exit
-'
-hdfs namenode -format
+server_list=('Master' 'Rserver1' 'Rserver2')
+path_list=(
+"/usr/local/hadoop/data/namenode/"
+"/usr/local/hadoop/data/datanode/"
+"/usr/local/hadoop/log/"
+"/usr/local/zookeeper/"
+"/usr/local/hbase/logs/"
+)
+for serv in ${server_list[@]}
+do
+	echo '========= ' $serv ' =========='
+	for path1 in ${path_list[@]}
+	do
+		ssh $serv "
+		if [ -d "$path1" ]; then
+			cd $path1
+			#rm -rf *
+			pwd
+		fi
+		exit
+		"
+	done
+done
+#hdfs namenode -format
